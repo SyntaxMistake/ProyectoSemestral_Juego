@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Sheep Count Game",
+    "slug": "sheep-count-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5a9e3a"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yourname.sheepcount"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5a9e3a"
+      },
+      "package": "com.yourname.sheepcount"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "sheepcount",
+    "plugins": ["expo-router"]
+  }
+}
