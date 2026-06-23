@@ -1,119 +1,119 @@
 # Sheep Count Game
 
-A top-down sheep counting game built with Expo (React Native).
+Juego de conteo de ovejas en vista cenital, construido con Expo (React Native).
 
-## Tech stack
+## Stack tecnológico
 
-| Package | Purpose |
+| Paquete | Propósito |
 |---|---|
-| `expo ~52` + `expo-router ~4` | Navigation & build tooling |
-| `react-native-svg ~15.8` | SVG-based game rendering (viewBox coordinate system) |
-| `react-native-safe-area-context` | Safe area insets for notched devices |
-| `react-native-screens ~4.4` | Native screen containers used by expo-router |
-| `@react-native-async-storage/async-storage` | Persisting top score & session history on device |
-| `zustand ^5` | In-memory session state (streak, correct/wrong counts) |
+| `expo ~52` + `expo-router ~4` | Navegación y herramientas de build |
+| `react-native-svg ~15.8` | Renderizado SVG con sistema de coordenadas viewBox |
+| `react-native-safe-area-context` | Márgenes de área segura en dispositivos con notch |
+| `react-native-screens ~4.4` | Contenedores nativos de pantalla usados por expo-router |
+| `@react-native-async-storage/async-storage` | Persistencia de puntuación máxima e historial en el dispositivo |
+| `zustand ^5` | Estado en memoria de la sesión (racha, aciertos/errores) |
 
-## Project structure
+## Estructura del proyecto
 
 ```
 SheepCountGame/
 ├── app/
-│   ├── _layout.jsx        # Root expo-router layout (Stack, StatusBar)
-│   ├── index.jsx          # Menu screen (play / view history / top score)
-│   ├── game.jsx           # Game screen (session timer, HUD, choice box, entry counter)
-│   └── history.jsx        # History screen (past sessions list)
+│   ├── _layout.jsx        # Layout raíz de expo-router (Stack, StatusBar)
+│   ├── index.jsx          # Pantalla de menú (jugar / historial / puntuación máxima)
+│   ├── game.jsx           # Pantalla de juego (temporizador, HUD, caja de respuestas, contador de entrada)
+│   └── history.jsx        # Pantalla de historial (lista de sesiones anteriores)
 │
 ├── components/
-│   ├── GameCanvas.jsx     # SVG canvas + requestAnimationFrame game loop
-│   └── ChoiceButtons.jsx  # Three answer option buttons
+│   ├── GameCanvas.jsx     # Canvas SVG + bucle de juego con requestAnimationFrame
+│   └── ChoiceButtons.jsx  # Tres botones de respuesta
 │
 ├── constants/
-│   └── game.js            # TILE, COLS, TOTAL_ROWS, corral config — derived from screen size
+│   └── game.js            # TILE, COLS, TOTAL_ROWS, configuración del corral — derivados del tamaño de pantalla
 │
 ├── hooks/
-│   └── useTopScore.js     # Load/save top score from AsyncStorage
+│   └── useTopScore.js     # Carga y guarda la puntuación máxima en AsyncStorage
 │
 ├── store/
-│   └── sessionStore.js    # Zustand store: streak + correct/wrong counters
+│   └── sessionStore.js    # Store de Zustand: racha + contadores de aciertos/errores
 │
 ├── utils/
 │   ├── format.js          # formatTime(), formatDuration()
 │   ├── sheep.js           # randomSheepCount() → 3–9, buildOptions()
-│   ├── sheepFactory.js    # buildSheep() — corral slots (3×3) + field targets
-│   ├── storage.js         # AsyncStorage helpers (top score + session history)
-│   └── trees.js           # buildTrees() — random tree positions per round
+│   ├── sheepFactory.js    # buildSheep() — slots del corral (3×3) + objetivos en el campo
+│   ├── storage.js         # Helpers de AsyncStorage (puntuación máxima + historial)
+│   └── trees.js           # buildTrees() — posiciones aleatorias de árboles por ronda
 │
 ├── assets/
 ├── app.json
 ├── babel.config.js
-├── jsconfig.json          # Path alias @/ for Expo's babel transform
+├── jsconfig.json          # Alias de ruta @/ para el transform de babel de Expo
 └── package.json
 ```
 
-## Setup
+## Instalación
 
 ```bash
-# 1. Install dependencies
+# 1. Instalar dependencias
 npm install --legacy-peer-deps
 
-# 2. Run on iOS simulator
+# 2. Ejecutar en simulador iOS
 npm run ios
 
-# 3. Run on Android
+# 3. Ejecutar en Android
 npm run android
 ```
 
-## Game flow
+## Flujo del juego
 
 ```
-Menu ──► Game (5 min session)
+Menú ──► Juego (sesión de 5 min)
               │
-              ├─ sheep exit corral one by one → spread across field (releasing)
-              ├─ sheep stop in field → 3 answer options appear (answering)
-              ├─ user picks → sheep return to corral one by one (returning)
-              │     └─ large number bounces on screen counting each sheep entering
-              └─ repeat until timer runs out or user ends session
-                    └─ saves session record → back to Menu
+              ├─ las ovejas salen del corral y se dispersan por el campo (releasing)
+              ├─ las ovejas se detienen → aparecen 3 opciones de respuesta (answering)
+              ├─ el jugador elige → las ovejas vuelven al corral de una en una (returning)
+              │     └─ un número grande rebota en pantalla contando cada oveja que entra
+              └─ se repite hasta que el temporizador llega a cero o el jugador termina
+                    └─ guarda el registro de la sesión → vuelve al Menú
 ```
 
-## Rendering
+## Renderizado
 
-The game renders using `react-native-svg` with a fixed internal coordinate system (`viewBox`):
+El juego renderiza con `react-native-svg` usando un sistema de coordenadas interno fijo (`viewBox`):
 
-- **Internal grid:** `COLS × TOTAL_ROWS` tiles, each tile `20×20 px` in viewBox space
-- **Display size:** `CANVAS_W = SCREEN_W − 64`, `CANVAS_H = SCREEN_H − 64` (32 px padding on all sides)
-- **Scale:** computed automatically by the SVG `viewBox`; all game logic uses tile coordinates
-- `TOTAL_ROWS` is calculated at startup from the device screen height so the canvas fills the available area on any device
+- **Cuadrícula interna:** `COLS × TOTAL_ROWS` tiles, cada tile `20×20 px` en el espacio del viewBox
+- **Tamaño en pantalla:** `CANVAS_W = SCREEN_W − 64`, `CANVAS_H = SCREEN_H − 64` (32 px de padding en todos los lados)
+- **Escala:** calculada automáticamente por el `viewBox` del SVG; toda la lógica del juego usa coordenadas en tiles
+- `TOTAL_ROWS` se calcula al iniciar la app desde la altura real del dispositivo para que el canvas llene el espacio disponible en cualquier pantalla
 
-## Layout zones
+## Zonas del canvas
 
-| Zone | Rows | Purpose |
+| Zona | Filas | Propósito |
 |---|---|---|
-| HUD | 0–3 | Timer, streak counter, end-session button (absolute overlay) |
-| Field | 4 – `CORRAL_Y − 3` | Sheep graze here; trees appear here |
-| Corral | `CORRAL_Y` – `TOTAL_ROWS − 10` | 9×8 tile pen; 3×3 slot grid |
-| Choice box buffer | last ~9 rows | Kept clear so the answer buttons don't cover the corral |
+| HUD | 0–3 | Temporizador, racha, botón de terminar sesión (overlay absoluto) |
+| Campo | 4 – `CORRAL_Y − 3` | Las ovejas pastan aquí; los árboles aparecen aquí |
+| Corral | `CORRAL_Y` – `TOTAL_ROWS − 10` | Establo de 9×8 tiles; cuadrícula de slots 3×3 |
+| Margen caja de respuestas | últimas ~9 filas | Libre para que los botones de respuesta no tapen el corral |
 
-## Sheep
+## Ovejas
 
-- **Scale:** `SHEEP_SCALE = 2.5` applied to each sheep's SVG group (~2.25 tiles wide visually)
-- **Corral slots:** 3 columns × 3 rows, `SLOT_SPACING = 2.5` tiles (≥ sheep width, no overlap)
-- **Field targets:** minimum 3.0 tile separation between sheep centers
-- **Separation force:** applied during `walkingout` and `toField` states to prevent sheep passing through each other in motion
-- **Count range:** 3–9 sheep per round (matches the 3×3 corral capacity)
+- **Escala:** `SHEEP_SCALE = 2.5` aplicado al grupo SVG de cada oveja (~2.25 tiles de ancho visual)
+- **Slots del corral:** 3 columnas × 3 filas, `SLOT_SPACING = 2.5` tiles (≥ ancho de la oveja, sin solapamiento)
+- **Objetivos en el campo:** separación mínima de 3.0 tiles entre centros de oveja
+- **Fuerza de separación:** aplicada en los estados `walkingout` y `toField` para evitar que las ovejas se atraviesen durante el movimiento
+- **Cantidad por ronda:** 3–9 ovejas (coincide con la capacidad 3×3 del corral)
 
-## Constants (`constants/game.js`)
+## Constantes (`constants/game.js`)
 
-All layout values are exported from a single file. `CORRAL_Y` and `TOTAL_ROWS` depend on the runtime screen dimensions so you rarely need to change them manually.
+Todos los valores de layout se exportan desde un único archivo. `CORRAL_Y` y `TOTAL_ROWS` dependen de las dimensiones reales de la pantalla en tiempo de ejecución.
 
-| Constant | Value | Description |
+| Constante | Valor | Descripción |
 |---|---|---|
-| `TILE` | 20 | Pixels per tile in viewBox space |
-| `COLS` | 19 | Grid columns (BASE_W = 380 px) |
-| `TOTAL_ROWS` | ~46 on iPhone 14 | Computed from screen height |
-| `BASE_H` | `TOTAL_ROWS × TILE` | viewBox height |
-| `SAFE_TOP_ROWS` | 4 | Rows reserved for HUD |
-| `CORRAL_X / Y` | 1 / dynamic | Corral top-left corner (tile coords) |
-| `CORRAL_W / H` | 9 / 8 | Corral size in tiles |
-| `SESSION_SECONDS` | 300 | Session duration (5 min) |
-| `ENTRY_STAGGER_FRAMES` | 22 | Frames between each sheep entering on return |
+| `TILE` | 20 | Píxeles por tile en el espacio del viewBox |
+| `COLS` | 19 | Columnas de la cuadrícula (BASE_W = 380 px) |
+| `TOTAL_ROWS` | ~46 en iPhone 14 | Calculado desde la altura de pantalla |
+| `BASE_H` | `TOTAL_ROWS × TILE` | Alto del viewBox |
+| `SAFE_TOP_ROWS` | 4 | Filas reservadas para el HUD |
+| `CORRAL_X / Y` | 1 / dinámico | Esquina superior izquierda del corral (coords en tiles) |
+| `CORRAL_W / H` | 9 / 8 | Tamaño del corral en tiles |
+| `SESSION_SECONDS` | 300 | Duración de la sesión (5 min) |
+| `ENTRY_STAGGER_FRAMES` | 22 | Fotogramas entre cada oveja al entrar en la vuelta |
