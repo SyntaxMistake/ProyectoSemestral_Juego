@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import * as Speech from "expo-speech";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -39,6 +40,20 @@ export default function GameScreen() {
 
   const sessionStart = useRef(Date.now());
   const countAnim = useRef(new Animated.Value(1)).current;
+  const voiceIdRef = useRef(null);
+
+  // Busca la voz en español de mejor calidad disponible en el dispositivo
+  // para que la lectura de números suene más natural que la voz por defecto.
+  useEffect(() => {
+    Speech.getAvailableVoicesAsync()
+      .then((voices) => {
+        const spanish = voices.filter((v) => v.language?.toLowerCase().startsWith("es"));
+        const pool = spanish.length ? spanish : voices;
+        const enhanced = pool.find((v) => v.quality === Speech.VoiceQuality.Enhanced);
+        voiceIdRef.current = (enhanced ?? pool[0])?.identifier ?? null;
+      })
+      .catch(() => {});
+  }, []);
 
   // Countdown timer
   useEffect(() => {
@@ -54,6 +69,11 @@ export default function GameScreen() {
       });
     }, 1000);
     return () => clearInterval(id);
+  }, []);
+
+  // Detiene cualquier lectura en curso al salir de la pantalla de juego
+  useEffect(() => {
+    return () => Speech.stop();
   }, []);
 
   function handleSheepReady(count, opts) {
@@ -80,6 +100,13 @@ export default function GameScreen() {
 
   function handleSheepEntered(count) {
     setSheepEnteredCount(count);
+    Speech.stop();
+    Speech.speak(String(count), {
+      language: "es-ES",
+      voice: voiceIdRef.current ?? undefined,
+      pitch: 1.0,
+      rate: 0.95,
+    });
     countAnim.setValue(1.4);
     Animated.spring(countAnim, {
       toValue: 1,

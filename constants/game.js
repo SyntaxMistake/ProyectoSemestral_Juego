@@ -30,6 +30,5 @@ export const CORRAL_X = 1;
 export const CORRAL_W = 9;  // 3 cols × 2.5 spacing = 7.5 tiles, con margen en CORRAL_W=9
 export const CORRAL_H = 8;  // 3 rows × 2.5 spacing = 7.5 tiles, con margen en CORRAL_H=8
 export const CORRAL_Y = TOTAL_ROWS - CORRAL_H - 9;
-export const CORRAL_DOOR_X = CORRAL_X + 1;
 
 export const ENTRY_STAGGER_FRAMES = 22;
